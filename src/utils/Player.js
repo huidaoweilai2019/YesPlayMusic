@@ -1,8 +1,7 @@
 import { getTrackDetail, scrobble, getMP3 } from "@/api/track";
 import { shuffle } from "lodash";
 import { Howler, Howl } from "howler";
-import localforage from "localforage";
-import { cacheTrack } from "@/utils/db";
+import { cacheTrackSource, getTrackSource } from "@/utils/db";
 import { getAlbum } from "@/api/album";
 import { getPlaylistDetail } from "@/api/playlist";
 import { getArtist } from "@/api/artist";
@@ -162,18 +161,17 @@ export default class {
     if (firstTrackID !== "first") this._shuffledList.unshift(firstTrackID);
   }
   async _scrobble(track, time, complete = false) {
-    console.log("scrobble");
     const trackDuration = ~~(track.dt / 1000);
+    time = complete ? trackDuration : time;
     scrobble({
       id: track.id,
       sourceid: this.playlistSource.id,
-      time: complete ? trackDuration : time,
+      time,
     });
     if (
       store.state.lastfm.key !== undefined &&
       (time >= trackDuration / 2 || time >= 240)
     ) {
-      console.log({ currentTrack: track });
       const timestamp = ~~(new Date().getTime() / 1000) - time;
       trackScrobble({
         artist: track.ar[0].name,
@@ -202,10 +200,9 @@ export default class {
     });
   }
   _getAudioSourceFromCache(id) {
-    let tracks = localforage.createInstance({ name: "tracks" });
-    return tracks.getItem(id).then((t) => {
-      if (t === null) return null;
-      const source = URL.createObjectURL(new Blob([t.mp3]));
+    return getTrackSource(id).then((t) => {
+      if (!t) return null;
+      const source = URL.createObjectURL(new Blob([t.source]));
       return source;
     });
   }
@@ -217,7 +214,7 @@ export default class {
         if (result.data[0].freeTrialInfo !== null) return null; // 跳过只能试听的歌曲
         const source = result.data[0].url.replace(/^http:/, "https:");
         if (store.state.settings.automaticallyCacheSongs) {
-          cacheTrack(track.id, source);
+          cacheTrackSource(track, source, result.data[0].br);
         }
         return source;
       });
@@ -231,7 +228,8 @@ export default class {
     if (process.env.IS_ELECTRON !== true) return null;
     const source = ipcRenderer.sendSync("unblock-music", track);
     if (store.state.settings.automaticallyCacheSongs && source?.url) {
-      cacheTrack(track.id, source.url);
+      // TODO: 将unblockMusic字样换成真正的来源（比如酷我咪咕等）
+      cacheTrackSource(track, source.url, 128000, "unblockMusic");
     }
     return source?.url;
   }
@@ -257,6 +255,7 @@ export default class {
       return this._getAudioSource(track).then((source) => {
         if (source) {
           this._playAudioSource(source, autoplay);
+          this._cacheNextTrack();
           return source;
         } else {
           store.dispatch("showToast", `无法播放 ${track.name}`);
@@ -265,6 +264,13 @@ export default class {
             : this.playPrevTrack();
         }
       });
+    });
+  }
+  _cacheNextTrack() {
+    const nextTrack = this._getNextTrack();
+    getTrackDetail(nextTrack[0]).then((data) => {
+      let track = data.songs[0];
+      this._getAudioSource(track);
     });
   }
   _loadSelfFromLocalStorage() {
@@ -425,7 +431,6 @@ export default class {
     document.title = `${this._currentTrack.name} · ${this._currentTrack.ar[0].name} - YesPlayMusic`;
     this._playDiscordPresence(this._currentTrack, this.seek());
     if (store.state.lastfm.key !== undefined) {
-      console.log({ currentTrack: this.currentTrack });
       trackUpdateNowPlaying({
         artist: this.currentTrack.ar[0].name,
         track: this.currentTrack.name,
@@ -459,7 +464,11 @@ export default class {
     }
   }
   setOutputDevice() {
-    if (this._howler._sounds.length <= 0 || !this._howler._sounds[0]._node) {
+    if (
+      process.env.IS_ELECTRON !== true ||
+      this._howler._sounds.length <= 0 ||
+      !this._howler._sounds[0]._node
+    ) {
       return;
     }
     this._howler._sounds[0]._node.setSinkId(store.state.settings.outputDevice);
@@ -504,6 +513,12 @@ export default class {
       let trackIDs = data.hotSongs.map((t) => t.id);
       this.replacePlaylist(trackIDs, id, "artist", trackID);
     });
+  }
+  playTrackOnListByID(id, listName = "default") {
+    if (listName === "default") {
+      this._current = this._list.findIndex((t) => t === id);
+    }
+    this._replaceCurrentTrack(id);
   }
   addTrackToPlayNext(trackID, playNow = false) {
     this._playNextList.push(trackID);
