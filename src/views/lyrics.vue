@@ -1,21 +1,6 @@
 <template>
   <transition name="slide-up">
     <div class="lyrics-page" :class="{ 'no-lyric': noLyric }">
-      <div
-        v-if="this.$store.state.settings.showLyricsDynamicBackground"
-        class="dynamic-background"
-      >
-        <div v-show="this.$store.state.showLyrics">
-          <div
-            class="top-right"
-            :style="{ backgroundImage: `url(${imageUrl})` }"
-          />
-          <div
-            class="bottom-left"
-            :style="{ backgroundImage: `url(${imageUrl})` }"
-          />
-        </div>
-      </div>
       <div class="left-side">
         <div>
           <div class="cover">
@@ -30,39 +15,37 @@
           <div class="controls">
             <div class="top-part">
               <div class="track-info">
-                <div class="title" :title="currentTrack.name">
-                  <router-link
+                <div class="title" :title="currentTrack.name"
+                  ><router-link
                     :to="`/${player.playlistSource.type}/${player.playlistSource.id}`"
                     @click.native="toggleLyrics"
-                    >{{ currentTrack.name }}
-                  </router-link>
-                </div>
-                <div class="subtitle">
-                  <router-link
+                    >{{ currentTrack.name }}</router-link
+                  ></div
+                >
+                <div class="subtitle"
+                  ><router-link
                     :to="`/artist/${currentTrack.ar[0].id}`"
                     @click.native="toggleLyrics"
-                    >{{ currentTrack.ar[0].name }}
-                  </router-link>
+                    >{{ currentTrack.ar[0].name }}</router-link
+                  >
                   -
                   <router-link
                     :to="`/album/${currentTrack.al.id}`"
                     @click.native="toggleLyrics"
                     :title="currentTrack.al.name"
-                    >{{ currentTrack.al.name }}
-                  </router-link>
-                </div>
+                    >{{ currentTrack.al.name }}</router-link
+                  ></div
+                >
               </div>
               <div class="buttons">
                 <button-icon
                   @click.native="playerRef.likeCurrentSong"
                   :title="$t('player.like')"
-                >
-                  <svg-icon
+                  ><svg-icon
                     :icon-class="
                       playerRef.isCurrentTrackLiked ? 'heart-solid' : 'heart'
                     "
-                  />
-                </button-icon>
+                /></button-icon>
                 <!-- <button-icon @click.native="openMenu" title="Menu"
                   ><svg-icon icon-class="more"
                 /></button-icon> -->
@@ -83,8 +66,8 @@
                   :tooltipFormatter="formatTrackTime"
                   @drag-end="setSeek"
                   ref="progress"
-                ></vue-slider>
-              </div>
+                ></vue-slider
+              ></div>
               <span>{{ formatTrackTime(progressMax) }}</span>
             </div>
             <div class="media-controls">
@@ -112,58 +95,47 @@
                   v-show="!player.isPersonalFM"
                   @click.native="playerRef.previous"
                   :title="$t('player.previous')"
-                >
-                  <svg-icon icon-class="previous" />
-                </button-icon>
+                  ><svg-icon icon-class="previous"
+                /></button-icon>
                 <button-icon
                   v-show="player.isPersonalFM"
                   @click.native="moveToFMTrash"
                   title="不喜欢"
-                >
-                  <svg-icon icon-class="thumbs-down" />
-                </button-icon>
+                  ><svg-icon icon-class="thumbs-down"
+                /></button-icon>
                 <button-icon
                   id="play"
                   @click.native="playerRef.play"
                   :title="$t(player.playing ? 'player.pause' : 'player.play')"
-                >
-                  <svg-icon
-                    :icon-class="playerRef.playing ? 'pause' : 'play'"
-                  />
-                </button-icon>
+                  ><svg-icon :icon-class="playerRef.playing ? 'pause' : 'play'"
+                /></button-icon>
                 <button-icon
                   @click.native="playerRef.next"
                   :title="$t('player.next')"
-                >
-                  <svg-icon icon-class="next" />
-                </button-icon>
+                  ><svg-icon icon-class="next"
+                /></button-icon>
               </div>
               <button-icon
                 v-show="!player.isPersonalFM"
                 @click.native="playerRef.shuffle"
                 :title="$t('player.shuffle')"
                 :class="{ active: player.shuffle }"
-              >
-                <svg-icon icon-class="shuffle" />
-              </button-icon>
+                ><svg-icon icon-class="shuffle"
+              /></button-icon>
             </div>
           </div>
         </div>
       </div>
       <div class="right-side">
         <transition name="slide-fade">
-          <div
-            class="lyrics-container"
-            :style="lyricFontSize"
-            ref="lyricsContainer"
-            v-show="!noLyric"
-          >
+          <div class="lyrics-container" ref="lyricsContainer" v-show="!noLyric">
             <div class="line" id="line-1"></div>
             <div
               class="line"
               :class="{
                 highlight: highlightLyricIndex === index,
               }"
+              :style="lineStyles"
               v-for="(line, index) in lyricWithTranslation"
               :key="index"
               :id="`line${index}`"
@@ -174,9 +146,7 @@
         </transition>
       </div>
       <div class="close-button" @click="toggleLyrics">
-        <button>
-          <svg-icon icon-class="arrow-down" />
-        </button>
+        <button><svg-icon icon-class="arrow-down" /></button>
       </div>
     </div>
   </transition>
@@ -258,9 +228,12 @@ export default {
       }
       return ret;
     },
-    lyricFontSize() {
+    haveTranslation() {
+      return this.tlyric.length > 0;
+    },
+    lineStyles() {
       return {
-        fontSize: `${this.$store.state.settings.lyricFontSize || 28}px`,
+        fontSize: this.haveTranslation ? "28px" : "36px",
       };
     },
     playerRef() {
@@ -372,52 +345,6 @@ export default {
   display: flex;
 }
 
-.dynamic-background {
-  --contrast-dynamic-background: 75%;
-  --brightness-dynamic-background: 150%;
-}
-
-[data-theme="dark"] .dynamic-background {
-  --contrast-dynamic-background: 125%;
-  --brightness-dynamic-background: 50%;
-}
-
-.dynamic-background {
-  .top-right,
-  .bottom-left {
-    z-index: 0;
-    width: 140vw;
-    height: 140vw;
-    position: absolute;
-    filter: blur(50px) opacity(0.6) contrast(var(--contrast-dynamic-background))
-      brightness(var(--brightness-dynamic-background));
-    background-size: cover;
-    animation: rotate 150s linear infinite;
-  }
-
-  .top-right {
-    right: 0;
-    top: 0;
-    mix-blend-mode: luminosity;
-  }
-
-  .bottom-left {
-    left: 0;
-    bottom: 0;
-    animation-direction: reverse;
-    animation-delay: 10s;
-  }
-}
-
-@keyframes rotate {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
 .left-side {
   flex: 1;
   display: flex;
@@ -426,12 +353,10 @@ export default {
   margin-top: 24px;
   align-items: center;
   transition: all 0.5s;
-
   .controls {
     max-width: 54vh;
     margin-top: 24px;
     color: var(--color-text);
-
     .title {
       margin-top: 8px;
       font-size: 1.4rem;
@@ -442,7 +367,6 @@ export default {
       -webkit-line-clamp: 1;
       overflow: hidden;
     }
-
     .subtitle {
       margin-top: 4px;
       font-size: 1rem;
@@ -456,15 +380,12 @@ export default {
     .top-part {
       display: flex;
       justify-content: space-between;
-
       .buttons {
         display: flex;
         align-items: center;
-
         button {
           margin: 0 0 0 4px;
         }
-
         .svg-icon {
           opacity: 0.58;
           height: 18px;
@@ -472,61 +393,50 @@ export default {
         }
       }
     }
-
     .progress-bar {
       margin-top: 22px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-
       .slider {
         width: 100%;
         flex-grow: grow;
         padding: 0 10px;
       }
-
       span {
         font-size: 15px;
         opacity: 0.58;
         min-width: 28px;
       }
     }
-
     .media-controls {
       display: flex;
       justify-content: center;
       margin-top: 18px;
       align-items: center;
-
       button {
         margin: 0;
       }
-
       .svg-icon {
         opacity: 0.38;
         height: 14px;
         width: 14px;
       }
-
       .active .svg-icon {
         opacity: 0.88;
       }
-
       .middle {
         padding: 0 16px;
         display: flex;
         align-items: center;
-
         button {
           margin: 0 8px;
         }
-
         button#play .svg-icon {
           height: 28px;
           width: 28px;
           padding: 2px;
         }
-
         .svg-icon {
           opacity: 0.88;
           height: 22px;
@@ -543,7 +453,6 @@ export default {
   .cover-container {
     position: relative;
   }
-
   img {
     border-radius: 0.75em;
     width: 54vh;
@@ -551,7 +460,6 @@ export default {
     user-select: none;
     object-fit: cover;
   }
-
   .shadow {
     position: absolute;
     top: 12px;
@@ -570,7 +478,6 @@ export default {
   font-weight: 600;
   color: var(--color-text);
   margin-right: 24px;
-
   .lyrics-container {
     height: 100%;
     display: flex;
@@ -579,40 +486,32 @@ export default {
     max-width: 460px;
     overflow-y: auto;
     transition: 0.5s;
-
     .line {
       padding: 18px;
       transition: 0.2s;
       border-radius: 12px;
-
       &:hover {
         background: var(--color-secondary-bg);
       }
-
       span {
         opacity: 0.28;
         cursor: default;
       }
     }
-
     .line#line-1:hover {
       background: unset;
     }
-
     .highlight span {
       opacity: 0.98;
       transition: 0.5s;
     }
   }
-
   ::-webkit-scrollbar {
     display: none;
   }
-
   .lyrics-container .line:first-child {
     margin-top: 50vh;
   }
-
   .lyrics-container .line:last-child {
     margin-bottom: calc(50vh - 128px);
   }
@@ -632,16 +531,14 @@ export default {
   opacity: 0.28;
   transition: 0.2s;
   -webkit-app-region: no-drag;
-
   .svg-icon {
     color: var(--color-text);
     padding-top: 5px;
     height: 22px;
     width: 22px;
   }
-
   &:hover {
-    background: var(--color-secondary-bg-for-transparent);
+    background: var(--color-secondary-bg);
     opacity: 0.88;
   }
 }
@@ -658,7 +555,6 @@ export default {
 .slide-up-leave-active {
   transition: all 0.4s;
 }
-
 .slide-up-enter, .slide-up-leave-to /* .fade-leave-active below version 2.1.8 */ {
   transform: translateY(100%);
 }
@@ -666,11 +562,9 @@ export default {
 .slide-fade-enter-active {
   transition: all 0.5s ease;
 }
-
 .slide-fade-leave-active {
   transition: all 0.5s cubic-bezier(0.2, 0.2, 0, 1);
 }
-
 .slide-fade-enter,
 .slide-fade-leave-to {
   transform: translateX(27vh);

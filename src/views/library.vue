@@ -4,6 +4,9 @@
       <img class="avatar" :src="data.user.avatarUrl | resizeImage" />{{
         data.user.nickname
       }}{{ $t("library.sLibrary") }}
+      <button-icon @click.native="showUserProfileMenu"
+        ><svg-icon icon-class="arrow-right"
+      /></button-icon>
     </h1>
     <div class="section-one">
       <div class="liked-songs" @click="goToLikedSongsList">
@@ -77,7 +80,7 @@
           icon="plus"
           v-show="currentTab === 'playlists'"
           @click="openAddPlaylistModal"
-          ><svg-icon icon-class="plus" />{{ $t("library.newPlayList") }}</button
+          ><svg-icon icon-class="plus" />新建歌单</button
         >
       </div>
 
@@ -109,6 +112,15 @@
         <MvRow :mvs="mvs" />
       </div>
     </div>
+
+    <ContextMenu ref="userProfileMenu">
+      <div class="item" @click="settings"
+        ><svg-icon icon-class="settings" />设置</div
+      >
+      <div class="item" @click="logout"
+        ><svg-icon icon-class="logout" />退出登录</div
+      >
+    </ContextMenu>
   </div>
 </template>
 
@@ -125,9 +137,11 @@ import {
 } from "@/api/user";
 import { randomNum, dailyTask } from "@/utils/common";
 import { getPlaylistDetail } from "@/api/playlist";
-import { isAccountLoggedIn } from "@/utils/auth";
+import { isAccountLoggedIn, doLogout } from "@/utils/auth";
 import NProgress from "nprogress";
 
+import ContextMenu from "@/components/ContextMenu.vue";
+import ButtonIcon from "@/components/ButtonIcon.vue";
 import TrackList from "@/components/TrackList.vue";
 import CoverRow from "@/components/CoverRow.vue";
 import SvgIcon from "@/components/SvgIcon.vue";
@@ -135,7 +149,7 @@ import MvRow from "@/components/MvRow.vue";
 
 export default {
   name: "Library",
-  components: { SvgIcon, CoverRow, TrackList, MvRow },
+  components: { SvgIcon, CoverRow, TrackList, MvRow, ButtonIcon, ContextMenu },
   data() {
     return {
       show: false,
@@ -328,6 +342,17 @@ export default {
         value: true,
       });
     },
+    showUserProfileMenu(e) {
+      this.$refs.userProfileMenu.openMenu(e);
+    },
+    logout() {
+      if (!confirm("确定要退出登录吗？")) return;
+      doLogout();
+      this.$router.push({ name: "home" });
+    },
+    settings() {
+      this.$router.push({ name: "settings" });
+    },
   },
   watch: {
     likedSongsInState() {
@@ -349,6 +374,12 @@ h1 {
     vertical-align: -7px;
     border-radius: 50%;
     border: rgba(0, 0, 0, 0.2);
+  }
+
+  .svg-icon {
+    width: 28px;
+    height: 28px;
+    opacity: 0.18;
   }
 }
 

@@ -96,7 +96,6 @@ import { loginWithPhone, loginWithEmail } from "@/api/auth";
 import { setCookies } from "@/utils/auth";
 import md5 from "crypto-js/md5";
 import { mapMutations } from "vuex";
-import nativeAlert from "@/utils/nativeAlert";
 
 export default {
   name: "Login",
@@ -131,7 +130,7 @@ export default {
         this.phone === "" ||
         this.password === ""
       ) {
-        nativeAlert("国家区号或手机号不正确");
+        alert("国家区号或手机号不正确");
         this.processing = false;
         return false;
       }
@@ -144,7 +143,7 @@ export default {
         this.password === "" ||
         !emailReg.test(this.email)
       ) {
-        nativeAlert("邮箱不正确");
+        alert("邮箱不正确");
         return false;
       }
       return true;
@@ -162,7 +161,7 @@ export default {
           .then(this.handleLoginResponse)
           .catch((error) => {
             this.processing = false;
-            nativeAlert(`发生错误，请检查你的账号密码是否正确\n${error}`);
+            alert(`发生错误，请检查你的账号密码是否正确\n${error}`);
           });
       } else {
         this.processing = this.validateEmail();
@@ -175,7 +174,7 @@ export default {
           .then(this.handleLoginResponse)
           .catch((error) => {
             this.processing = false;
-            nativeAlert(`发生错误，请检查你的账号密码是否正确\n${error}`);
+            alert(`发生错误，请检查你的账号密码是否正确\n${error}`);
           });
       }
     },
@@ -192,7 +191,7 @@ export default {
       } else {
         this.processing = false;
         console.log(data.msg);
-        nativeAlert(data.msg ?? data.message ?? "账号或密码错误，请检查");
+        alert(data.msg ?? data.message ?? "账号或密码错误，请检查");
       }
     },
   },
