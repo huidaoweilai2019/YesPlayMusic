@@ -10,7 +10,6 @@ export function createTouchBar(window) {
   // Icon Resource: https://devimages-cdn.apple.com/design/resources/
   function getNativeIcon(name) {
     return nativeImage.createFromPath(
-      // eslint-disable-next-line no-undef
       path.join(__static, "img/touchbar/", name)
     );
   }
