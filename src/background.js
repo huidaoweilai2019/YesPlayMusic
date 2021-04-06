@@ -6,7 +6,6 @@ import {
   shell,
   dialog,
   globalShortcut,
-  nativeTheme,
 } from "electron";
 import { createProtocol } from "vue-cli-plugin-electron-builder/lib";
 import { startNeteaseMusicApi } from "./electron/services";
@@ -51,6 +50,9 @@ class Background {
     // create Express app
     this.createExpressApp();
 
+    // init ipcMain
+    initIpcMain(this.window, this.store);
+
     // Scheme must be registered before the app is ready
     protocol.registerSchemesAsPrivileged([
       { scheme: "app", privileges: { secure: true, standard: true } },
@@ -94,8 +96,6 @@ class Background {
   createWindow() {
     console.log("creating app window");
 
-    const appearance = this.store.get("settings.appearance");
-
     this.window = new BrowserWindow({
       width: this.store.get("window.width") || 1440,
       height: this.store.get("window.height") || 840,
@@ -103,19 +103,12 @@ class Background {
       minHeight: 720,
       titleBarStyle: "hiddenInset",
       frame: process.platform !== "win32",
-      title: "YesPlayMusic",
       webPreferences: {
         webSecurity: false,
         nodeIntegration: true,
         enableRemoteModule: true,
         contextIsolation: false,
       },
-      backgroundColor:
-        ((appearance === undefined || appearance === "auto") &&
-          nativeTheme.shouldUseDarkColors) ||
-        appearance === "dark"
-          ? "#222"
-          : "#fff",
     });
 
     // hide menu bar on Microsoft Windows and Linux
@@ -193,25 +186,6 @@ class Background {
 
     this.window.webContents.on("new-window", function (e, url) {
       e.preventDefault();
-      console.log("open url");
-      const excludeHosts = ["www.last.fm"];
-      const exclude = excludeHosts.find((host) => url.includes(host));
-      if (exclude) {
-        const newWindow = new BrowserWindow({
-          width: 800,
-          height: 600,
-          titleBarStyle: "default",
-          title: "YesPlayMusic",
-          webPreferences: {
-            webSecurity: false,
-            nodeIntegration: true,
-            enableRemoteModule: true,
-            contextIsolation: false,
-          },
-        });
-        newWindow.loadURL(url);
-        return;
-      }
       shell.openExternal(url);
     });
   }
@@ -232,9 +206,6 @@ class Background {
       this.createWindow();
       this.handleWindowEvents();
 
-      // init ipcMain
-      initIpcMain(this.window, this.store);
-
       // check for updates
       this.checkForUpdates();
 
@@ -253,9 +224,7 @@ class Background {
       this.window.setTouchBar(createTouchBar(this.window));
 
       // register global shortcuts
-      if (this.store.get("settings.enableGlobalShortcut")) {
-        registerGlobalShortcut(this.window);
-      }
+      registerGlobalShortcut(this.window);
     });
 
     app.on("activate", () => {
