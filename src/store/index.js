@@ -27,12 +27,9 @@ const store = new Vuex.Store(options);
 
 if ([undefined, null].includes(store.state.settings.lang)) {
   const defaultLang = "en";
-  const langMapper = new Map()
-    .set("zh", "zh-CN")
-    .set("en", "en")
-    .set("tr", "tr");
-  store.state.settings.lang =
-    langMapper.get(navigator.language.slice(0, 2)) || defaultLang;
+  // when more languages are available, use Map instead of prefer logic
+  const preferChinese = navigator.language.slice(0, 2) === "zh";
+  store.state.settings.lang = preferChinese ? "zh-CN" : defaultLang;
   localStorage.setItem("settings", JSON.stringify(store.state.settings));
 }
 
