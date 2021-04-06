@@ -7,15 +7,6 @@ module.exports = {
   devServer: {
     disableHostCheck: true,
     port: process.env.DEV_SERVER_PORT || 8080,
-    proxy: {
-      "^/api": {
-        target: "http://localhost:3000",
-        changeOrigin: true,
-        pathRewrite: {
-          "^/api": "/",
-        },
-      },
-    },
   },
   pwa: {
     name: "YesPlayMusic",
@@ -58,7 +49,6 @@ module.exports = {
   pluginOptions: {
     // electron-builder的配置文件
     electronBuilder: {
-      nodeIntegration: true,
       externals: ["@nondanee/unblockneteasemusic", "@njzy/unblockneteasemusic"],
       builderOptions: {
         productName: "YesPlayMusic",
@@ -81,55 +71,26 @@ module.exports = {
           target: [
             {
               target: "dmg",
-              arch: ["x64", "arm64", "universal"],
+              arch: ["arm64", "x64"],
+            },
+            {
+              target: "zip",
+              arch: ["arm64", "x64"],
+              // arch: ["universal"]
             },
           ],
-          artifactName: "${productName}-${os}-${version}-${arch}.${ext}",
+          artifactName: "${productName}-${arch}.${ext}",
           category: "public.app-category.music",
           darkModeSupport: true,
         },
         win: {
-          target: [
-            {
-              target: "portable",
-              arch: ["x64"],
-            },
-            {
-              target: "nsis",
-              arch: ["x64"],
-            },
-          ],
+          target: ["nsis", "portable"],
           publisherName: "YesPlayMusic",
           icon: "build/icons/icon.ico",
           publish: ["github"],
         },
         linux: {
-          target: [
-            {
-              target: "AppImage",
-              arch: ["x64"],
-            },
-            {
-              target: "tar.gz",
-              arch: ["x64"],
-            },
-            {
-              target: "deb",
-              arch: ["x64"],
-            },
-            {
-              target: "rpm",
-              arch: ["x64"],
-            },
-            {
-              target: "snap",
-              arch: ["x64"],
-            },
-            {
-              target: "pacman",
-              arch: ["x64"],
-            },
-          ],
+          target: ["AppImage", "tar.gz", "deb", "rpm", "snap", "pacman"],
           category: "Music",
           icon: "./build/icon.icns",
         },
