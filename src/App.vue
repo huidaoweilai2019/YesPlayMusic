@@ -122,7 +122,6 @@ body {
 html {
   overflow-y: overlay;
   min-width: 768px;
-  overscroll-behavior: none;
 }
 
 main {
