@@ -48,7 +48,6 @@ export default {
   playlist: {
     playlist: "歌单",
     updatedAt: "最后更新于",
-    search: "搜索歌单音乐",
   },
   login: {
     accessToAll: "可访问全部数据",
@@ -119,8 +118,6 @@ export default {
       high: "极高",
       lossless: "无损",
     },
-    deviceSelector: "音频输出设备",
-    permissionRequired: "需要麦克风权限",
     appearance: {
       text: "外观",
       auto: "自动",

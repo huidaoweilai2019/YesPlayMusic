@@ -51,7 +51,6 @@ export default {
   playlist: {
     playlist: "Playlists",
     updatedAt: "Updated at",
-    search: "Search in playlist",
   },
   login: {
     accessToAll: "Access to all data",
@@ -118,8 +117,6 @@ export default {
       high: "High",
       lossless: "Lossless",
     },
-    deviceSelector: "Audio Output Device",
-    permissionRequired: "Microphone Permission Required",
     appearance: {
       text: "Appearance",
       auto: "Auto",
