@@ -119,8 +119,11 @@ export default {
   },
   methods: {
     ...mapMutations(["updateLikedSongs", "updateModal"]),
-    ...mapActions(["nextTrack", "showToast"]),
+    ...mapActions(["nextTrack", "playTrackOnListByID", "showToast"]),
     openMenu(e, track) {
+      if (!track.playable) {
+        return;
+      }
       this.rightClickedTrack = track;
       this.$refs.menu.openMenu(e);
     },
@@ -138,7 +141,7 @@ export default {
       } else if (this.dbclickTrackFunc === "none") {
         // do nothing
       } else if (this.dbclickTrackFunc === "playTrackOnListByID") {
-        this.$store.state.player.playTrackOnListByID(trackID);
+        this.playTrackOnListByID(trackID);
       } else if (this.dbclickTrackFunc === "playPlaylistByID") {
         this.$store.state.player.playPlaylistByID(this.id, trackID);
       } else if (this.dbclickTrackFunc === "playAList") {

@@ -56,7 +56,9 @@
       <div></div>
     </div>
     <div class="album" v-if="!isTracklist && !isAlbum">
-      <router-link :to="`/album/${album.id}`">{{ album.name }}</router-link>
+      <router-link :to="`/album/${track.al.id}`">{{
+        track.al.name
+      }}</router-link>
       <div></div>
     </div>
     <div class="actions" v-if="!isTracklist">
@@ -64,7 +66,8 @@
         <svg-icon
           icon-class="heart"
           :style="{
-            visibility: focus && !isLiked ? 'visible' : 'hidden',
+            visibility:
+              focus && !isLiked && track.playable ? 'visible' : 'hidden',
           }"
         ></svg-icon>
         <svg-icon icon-class="heart-solid" v-show="isLiked"></svg-icon>
@@ -107,9 +110,6 @@ export default {
       if (this.track.ar !== undefined) return this.track.ar;
       if (this.track.artists !== undefined) return this.track.artists;
       return [];
-    },
-    album() {
-      return this.track.album || this.track.al;
     },
     type() {
       return this.$parent.type;
