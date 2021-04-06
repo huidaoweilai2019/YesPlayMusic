@@ -149,7 +149,6 @@ export default {
     showUnavailableSongInGreyStyle: "Show unavailable song in grey style",
     showPlaylistsByAppleMusic: "Show playlists by Apple Music",
     enableDiscordRichPresence: "Enable Discord Rich Presence",
-    enableGlobalShortcut: "Enable Global Shortcut",
   },
   contextMenu: {
     play: "Play",
