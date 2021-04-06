@@ -72,7 +72,6 @@
             </div>
             <div class="media-controls">
               <button-icon
-                v-show="!player.isPersonalFM"
                 @click.native="playerRef.repeat"
                 :title="
                   player.repeatMode === 'one'
@@ -92,19 +91,11 @@
               </button-icon>
               <div class="middle">
                 <button-icon
-                  v-show="!player.isPersonalFM"
                   @click.native="playerRef.previous"
                   :title="$t('player.previous')"
                   ><svg-icon icon-class="previous"
                 /></button-icon>
                 <button-icon
-                  v-show="player.isPersonalFM"
-                  @click.native="moveToFMTrash"
-                  title="不喜欢"
-                  ><svg-icon icon-class="thumbs-down"
-                /></button-icon>
-                <button-icon
-                  id="play"
                   @click.native="playerRef.play"
                   :title="$t(player.playing ? 'player.pause' : 'player.play')"
                   ><svg-icon :icon-class="playerRef.playing ? 'pause' : 'play'"
@@ -116,7 +107,6 @@
                 /></button-icon>
               </div>
               <button-icon
-                v-show="!player.isPersonalFM"
                 @click.native="playerRef.shuffle"
                 :title="$t('player.shuffle')"
                 :class="{ active: player.shuffle }"
@@ -139,7 +129,7 @@
               v-for="(line, index) in lyricWithTranslation"
               :key="index"
               :id="`line${index}`"
-              @click="clickLyricLine(line.time)"
+              @click="seek(line.time)"
               ><span v-html="formatLine(line)"></span
             ></div>
           </div>
@@ -280,11 +270,6 @@ export default {
       this.$parent.$refs.player.setProgress(value);
       this.$parent.$refs.player.player.seek(value);
     },
-    clickLyricLine(value) {
-      if (window.getSelection().toString().length === 0) {
-        this.seek(value);
-      }
-    },
     setLyricsInterval() {
       this.lyricsInterval = setInterval(() => {
         const progress = this.player.seek() ?? 0;
@@ -313,9 +298,6 @@ export default {
       } else {
         return `<span>${line.contents[0]}</span>`;
       }
-    },
-    moveToFMTrash() {
-      this.player.moveToFMTrash();
     },
   },
   watch: {
@@ -432,7 +414,7 @@ export default {
         button {
           margin: 0 8px;
         }
-        button#play .svg-icon {
+        button:nth-child(2) .svg-icon {
           height: 28px;
           width: 28px;
           padding: 2px;
@@ -487,6 +469,7 @@ export default {
     overflow-y: auto;
     transition: 0.5s;
     .line {
+      // margin-top: 38px;
       padding: 18px;
       transition: 0.2s;
       border-radius: 12px;
@@ -497,9 +480,6 @@ export default {
         opacity: 0.28;
         cursor: default;
       }
-    }
-    .line#line-1:hover {
-      background: unset;
     }
     .highlight span {
       opacity: 0.98;

@@ -93,7 +93,6 @@
 <script>
 import NProgress from "nprogress";
 import { loginWithPhone, loginWithEmail } from "@/api/auth";
-import { setCookies } from "@/utils/auth";
 import md5 from "crypto-js/md5";
 import { mapMutations } from "vuex";
 
@@ -184,7 +183,6 @@ export default {
         return;
       }
       if (data.code === 200) {
-        setCookies(data.cookie);
         this.updateData({ key: "user", value: data.profile });
         this.updateData({ key: "loginMode", value: "account" });
         this.$router.push({ path: "/library" });

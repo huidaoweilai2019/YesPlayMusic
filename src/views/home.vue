@@ -23,13 +23,6 @@
       />
     </div>
     <div class="index-row">
-      <div class="title"> For You </div>
-      <div class="for-you-row">
-        <FMCard />
-        <div></div>
-      </div>
-    </div>
-    <div class="index-row">
       <div class="title">{{ $t("home.recommendArtist") }}</div>
       <CoverRow
         type="artist"
@@ -68,12 +61,12 @@ import { byAppleMusic } from "@/utils/staticData";
 import { newAlbums } from "@/api/album";
 import NProgress from "nprogress";
 import { mapState } from "vuex";
+
 import CoverRow from "@/components/CoverRow.vue";
-import FMCard from "@/components/FMCard.vue";
 
 export default {
   name: "Home",
-  components: { CoverRow, FMCard },
+  components: { CoverRow },
   data() {
     return {
       show: false,
@@ -170,12 +163,5 @@ footer {
   display: flex;
   justify-content: center;
   margin-top: 48px;
-}
-
-.for-you-row {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
-  margin-bottom: 78px;
 }
 </style>
