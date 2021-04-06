@@ -1,7 +1,5 @@
-import { app, dialog, globalShortcut, ipcMain } from "electron";
+import { app, ipcMain, dialog } from "electron";
 import match from "@njzy/unblockneteasemusic";
-import { registerGlobalShortcut } from "@/electron/globalShortcut";
-
 const client = require("discord-rich-presence")("818936529484906596");
 
 export function initIpcMain(win, store) {
@@ -63,14 +61,6 @@ export function initIpcMain(win, store) {
 
   ipcMain.on("settings", (event, options) => {
     store.set("settings", options);
-    const isRegisterShortcut = globalShortcut.isRegistered(
-      "Alt+CommandOrControl+P"
-    );
-    if (options.enableGlobalShortcut) {
-      !isRegisterShortcut && registerGlobalShortcut(win);
-    } else {
-      isRegisterShortcut && globalShortcut.unregisterAll();
-    }
   });
 
   ipcMain.on("playDiscordPresence", (event, track) => {
