@@ -278,15 +278,6 @@ export default class {
       });
       navigator.mediaSession.setActionHandler("seekto", (event) => {
         this.seek(event.seekTime);
-        this._updateMediaSessionPositionState();
-      });
-      navigator.mediaSession.setActionHandler("seekbackward", (event) => {
-        this.seek(this.seek() - (event.seekOffset || 10));
-        this._updateMediaSessionPositionState();
-      });
-      navigator.mediaSession.setActionHandler("seekforward", (event) => {
-        this.seek(this.seek() + (event.seekOffset || 10));
-        this._updateMediaSessionPositionState();
       });
     }
   }
@@ -308,18 +299,6 @@ export default class {
       ],
     });
   }
-  _updateMediaSessionPositionState() {
-    if ("mediaSession" in navigator === false) {
-      return;
-    }
-    if ("setPositionState" in navigator.mediaSession) {
-      navigator.mediaSession.setPositionState({
-        duration: ~~(this.currentTrack.dt / 1000),
-        playbackRate: 1.0,
-        position: this.seek(),
-      });
-    }
-  }
   _nextTrackCallback() {
     this._scrobble(true);
     if (this.repeatMode === "one") {
@@ -333,26 +312,6 @@ export default class {
       this._personalFMNextTrack = result.data[0];
       return this._personalFMNextTrack;
     });
-  }
-  _playDiscordPresence(track, seekTime = 0) {
-    if (
-      process.env.IS_ELECTRON !== true ||
-      store.state.settings.enableDiscordRichPresence === false
-    ) {
-      return null;
-    }
-    let copyTrack = { ...track };
-    copyTrack.dt -= seekTime * 1000;
-    ipcRenderer.send("playDiscordPresence", copyTrack);
-  }
-  _pauseDiscordPresence(track) {
-    if (
-      process.env.IS_ELECTRON !== true ||
-      store.state.settings.enableDiscordRichPresence === false
-    ) {
-      return null;
-    }
-    ipcRenderer.send("pauseDiscordPresence", track);
   }
 
   currentTrackID() {
@@ -402,14 +361,12 @@ export default class {
     this._howler.pause();
     this._playing = false;
     document.title = "YesPlayMusic";
-    this._pauseDiscordPresence(this._currentTrack);
   }
   play() {
     if (this._howler.playing()) return;
     this._howler.play();
     this._playing = true;
     document.title = `${this._currentTrack.name} · ${this._currentTrack.ar[0].name} - YesPlayMusic`;
-    this._playDiscordPresence(this._currentTrack, this.seek());
   }
   playOrPause() {
     if (this._howler.playing()) {
@@ -419,11 +376,7 @@ export default class {
     }
   }
   seek(time = null) {
-    if (time !== null) {
-      this._howler.seek(time);
-      if (this._playing)
-        this._playDiscordPresence(this._currentTrack, this.seek());
-    }
+    if (time !== null) this._howler.seek(time);
     return this._howler === null ? 0 : this._howler.seek();
   }
   mute() {
@@ -435,9 +388,7 @@ export default class {
     }
   }
   setOutputDevice() {
-    if (this._howler._sounds.length <= 0 || !this._howler._sounds[0]._node) {
-      return;
-    }
+    if (this._howler._sounds.length <= 0) return;
     this._howler._sounds[0]._node.setSinkId(store.state.settings.outputDevice);
   }
 
