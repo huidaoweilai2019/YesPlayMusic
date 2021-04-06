@@ -118,11 +118,6 @@ const routes = [
     name: "settings",
     component: () => import("@/views/settings.vue"),
   },
-  {
-    path: "/daily/songs",
-    name: "dailySongs",
-    component: () => import("@/views/dailyTracks.vue"),
-  },
 ];
 const router = new VueRouter({
   routes,
@@ -160,7 +155,7 @@ router.beforeEach((to, from, next) => {
 router.afterEach((to) => {
   if (
     to.matched.some((record) => !record.meta.keepAlive) &&
-    !["settings", "dailySongs"].includes(to.name)
+    !["settings"].includes(to.name)
   ) {
     NProgress.start();
   }
