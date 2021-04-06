@@ -1,26 +1,5 @@
 <template>
   <nav>
-    <div class="win32-titlebar">
-      <div class="title">YesPlayMusic</div>
-      <div class="controls">
-        <div
-          class="button minimize codicon codicon-chrome-minimize"
-          @click="windowMinimize"
-        ></div>
-        <div
-          class="button max-restore codicon"
-          @click="windowMaxRestore"
-          :class="{
-            'codicon-chrome-restore': windowIsMaximized,
-            'codicon-chrome-maximize': !windowIsMaximized,
-          }"
-        ></div>
-        <div
-          class="button close codicon codicon-chrome-close"
-          @click="windowClose"
-        ></div>
-      </div>
-    </div>
     <div class="navigation-buttons">
       <button-icon @click.native="go('back')"
         ><svg-icon icon-class="arrow-left"
@@ -74,16 +53,6 @@
 import ButtonIcon from "@/components/ButtonIcon.vue";
 import { mapState } from "vuex";
 
-// import icons for win32 title bar
-// icons by https://github.com/microsoft/vscode-codicons
-import "vscode-codicons/dist/codicon.css";
-
-let win = undefined;
-if (process.env.IS_ELECTRON === true) {
-  const electron = require("electron");
-  win = electron.remote.BrowserWindow.getFocusedWindow();
-}
-
 export default {
   name: "Navbar",
   components: {
@@ -94,7 +63,6 @@ export default {
       inputFocus: false,
       langs: ["zh-CN", "en"],
       keywords: "",
-      windowIsMaximized: win ? win.isMaximized() : true,
     };
   },
   computed: {
@@ -117,21 +85,6 @@ export default {
         name: "search",
         params: { keywords: this.keywords },
       });
-    },
-    windowMinimize() {
-      win.minimize();
-    },
-    windowMaxRestore() {
-      if (win.isMaximized()) {
-        win.restore();
-        this.windowIsMaximized = false;
-      } else {
-        win.maximize();
-        this.windowIsMaximized = true;
-      }
-    },
-    windowClose() {
-      win.close();
     },
   },
 };
@@ -167,70 +120,6 @@ nav {
 @supports (-moz-appearance: none) {
   nav {
     background-color: var(--color-body-bg);
-  }
-}
-
-.win32-titlebar {
-  display: none;
-}
-
-[data-electron-os="win32"] {
-  nav {
-    padding-top: 20px;
-    -webkit-app-region: no-drag;
-  }
-  .win32-titlebar {
-    color: var(--color-text);
-    position: fixed;
-    left: 0;
-    top: 0;
-    right: 0;
-    -webkit-app-region: drag;
-    display: flex;
-    align-items: center;
-    --hover: #e6e6e6;
-    --active: #cccccc;
-
-    .title {
-      padding: 8px;
-      font-size: 12px;
-      font-family: "Segoe UI", "Microsoft YaHei UI", "Microsoft YaHei",
-        sans-serif;
-    }
-    .controls {
-      height: 32px;
-      margin-left: auto;
-      justify-content: flex-end;
-      display: flex;
-      .button {
-        height: 100%;
-        width: 46px;
-        font-size: 16px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        -webkit-app-region: no-drag;
-        &:hover {
-          background: var(--hover);
-        }
-        &:active {
-          background: var(--active);
-        }
-        &.close {
-          &:hover {
-            background: rgba(232, 17, 35, 0.9);
-          }
-          &:active {
-            background: #f1707a;
-            color: #000;
-          }
-        }
-      }
-    }
-  }
-  &[data-theme="dark"] .win32-titlebar {
-    --hover: #191919;
-    --active: #333333;
   }
 }
 
@@ -357,10 +246,6 @@ nav {
     height: 24px;
     width: 24px;
     color: var(--color-text);
-    -webkit-app-region: no-drag;
-  }
-  .search-button {
-    display: none;
     -webkit-app-region: no-drag;
   }
 }
